@@ -150,13 +150,13 @@ namespace Pong
 				switch (paddle_contact)
 				{
 				case Contact::Top:
-					ball.velocity.y = 0.75;
+					ball.velocity.y = -0.75;
 					break;
 				case Contact::Middle:
 					ball.velocity.y = 0;
 					break;
 				case Contact::Bottom:
-					ball.velocity.y = -0.75;
+					ball.velocity.y = 0.75;
 					break;
 				}
                 return Contact::None;
@@ -185,6 +185,12 @@ namespace Pong
 
     }
 
+    std::tuple<Ball, Paddle,Paddle> initShapes() {
+        return { Ball({ c_WINDOW_WIDTH / 2, c_WINDOW_HEIGHT / 2 }, {0.5,0}),
+                Paddle({ c_RIGHT_PADDLE_X, c_WINDOW_HEIGHT / 2 - (c_PADDLE_HEIGHT / 2)}, { 0,0 }),
+                Paddle({c_LEFT_PADDLE_X, c_WINDOW_HEIGHT / 2 - (c_PADDLE_HEIGHT / 2)}, {0,0}) };
+    }
+
 }
 
 int main()
@@ -203,12 +209,9 @@ int main()
     sf::RectangleShape ball_rect({ c_BALL_SIZE, c_BALL_SIZE});
     ball_rect.setFillColor(sf::Color::White);
 
-    auto right_paddle = Pong::Paddle({ c_RIGHT_PADDLE_X, c_WINDOW_HEIGHT / 2 - (c_PADDLE_HEIGHT /2)}, { 0,0 });
-    auto left_paddle = Pong::Paddle({c_LEFT_PADDLE_X, c_WINDOW_HEIGHT / 2 - (c_PADDLE_HEIGHT /2)}, {0,0});
-    auto ball = Pong::Ball({ c_WINDOW_WIDTH / 2, c_WINDOW_HEIGHT / 2 }, {1,0});
+    auto [ball, right_paddle, left_paddle] = Pong::initShapes();
 
     const float paddle_speed = 1;
-    const float ball_speed = 1;
     int score_left = 0;
     int score_right = 0;
 
@@ -246,9 +249,9 @@ int main()
         {
         case Pong::CollisionHandling::Contact::Left:
             score_right++;
-            left_paddle = Pong::Paddle({c_LEFT_PADDLE_X, c_WINDOW_HEIGHT / 2 - (c_PADDLE_HEIGHT /2)}, {0,0});
-right_Pong::Paddle({c_LEFT_PADDLE_X, c_WINDOW_HEIGHT / 2 - (c_PADDLE_HEIGHT /2)}, {0,0});
-
+        case Pong::CollisionHandling::Contact::Right:
+            score_right++;
+        std::tie(ball, right_paddle, left_paddle) = Pong::initShapes();
         }
 
 
