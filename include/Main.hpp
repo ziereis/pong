@@ -9,6 +9,8 @@ namespace
     const int c_LEFT_PADDLE_X = 5;
     const int c_RIGHT_PADDLE_X = c_WINDOW_WIDTH - (c_LEFT_PADDLE_X + c_PADDLE_WIDTH);
     const int c_BALL_SIZE = 10;
+    const float c_BALL_X_SPEED = 0.7;
+    const float c_BALL_Y_SPEED = c_BALL_X_SPEED;
 }
 
 

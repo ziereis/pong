@@ -186,7 +186,13 @@ namespace Pong
     }
 
     std::tuple<Ball, Paddle,Paddle> initShapes() {
-        return { Ball({ c_WINDOW_WIDTH / 2, c_WINDOW_HEIGHT / 2 }, {0.5,0}),
+        std::array<float, 2> possible_x_velocities{ c_BALL_X_SPEED,-c_BALL_X_SPEED };
+        std::array<float, 3> possible_y_velocities{ c_BALL_Y_SPEED,-c_BALL_Y_SPEED, 0 };
+        const int x_index = rand() % 2;
+        const int y_index = rand() % 3;
+
+        return { Ball({ c_WINDOW_WIDTH / 2, c_WINDOW_HEIGHT / 2 }, {possible_x_velocities[x_index],
+                                                                    possible_y_velocities[y_index]}),
                 Paddle({ c_RIGHT_PADDLE_X, c_WINDOW_HEIGHT / 2 - (c_PADDLE_HEIGHT / 2)}, { 0,0 }),
                 Paddle({c_LEFT_PADDLE_X, c_WINDOW_HEIGHT / 2 - (c_PADDLE_HEIGHT / 2)}, {0,0}) };
     }
@@ -196,6 +202,10 @@ namespace Pong
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(c_WINDOW_WIDTH, c_WINDOW_HEIGHT), "Pong");
+
+    sf::Font font;
+    if (!font.loadFromFile("Arial.ttf"))
+        std::cout << "couldnt load font\n";
 
     const int length{ 20 };
     sf::RectangleShape net_rect({ 3,length });
@@ -211,18 +221,29 @@ int main()
 
     auto [ball, right_paddle, left_paddle] = Pong::initShapes();
 
-    const float paddle_speed = 1;
-    int score_left = 0;
-    int score_right = 0;
+    sf::Text left_score;
+    left_score.setFont(font);
+    left_score.setPosition({ c_WINDOW_WIDTH / 4, 0 });
+    left_score.setFillColor(sf::Color::White);
+    left_score.setCharacterSize(24);
 
+    sf::Text right_score;
+    right_score.setFont(font);
+    right_score.setPosition({ (c_WINDOW_WIDTH / 4) *3, 0 });
+    right_score.setFillColor(sf::Color::White);
+    right_score.setCharacterSize(24);
+
+    int left_score_count{ 0 };
+    int right_score_count{ 0 };
+    const float paddle_speed{ 1 };
     std::array<bool, 4> keys{};
 
-    float dt = 0.0f;
+    float dt = { 0.0f };
 
     while (window.isOpen())
     {
         auto startTime = std::chrono::high_resolution_clock::now();
-        
+
         Pong::handleInput(window, keys);
 
         if (keys[Pong::Buttons::LeftUp])
@@ -245,19 +266,31 @@ int main()
 
         auto collision = Pong::CollisionHandling::handleCollission(ball, left_paddle, right_paddle);
 
-        switch (collision)
+        if (collision == Pong::CollisionHandling::Contact::Left ||
+            collision == Pong::CollisionHandling::Contact::Right)
         {
-        case Pong::CollisionHandling::Contact::Left:
-            score_right++;
-        case Pong::CollisionHandling::Contact::Right:
-            score_right++;
-        std::tie(ball, right_paddle, left_paddle) = Pong::initShapes();
+			switch (collision)
+			{
+			case Pong::CollisionHandling::Contact::Left:
+				right_score_count++;
+                break;
+			case Pong::CollisionHandling::Contact::Right:
+				left_score_count++;
+                break;
+			}
+			std::tie(ball, right_paddle, left_paddle) = Pong::initShapes();
         }
 
 
 
 
+        left_score.setString(std::to_string(left_score_count));
+        right_score.setString(std::to_string(right_score_count));
+
+
         window.clear();
+        window.draw(left_score);
+        window.draw(right_score);
         Pong::drawNet(window, net_rect, length);
         left_paddle.draw(window, paddle_rect);
         right_paddle.draw(window, paddle_rect);
